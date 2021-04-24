@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,6 +48,18 @@ public class FileStorageServiceImpl implements FileStorageService {
 
         return new UploadFileResponse(fileName, fileDownloadUri,
                 file.getContentType(), file.getSize());
+    }
+
+    @Override
+    public List<String> fetchFileNames() {
+
+        log.info("Fetch file names process begins");
+
+        List<String> fileNames = listFilesForFolder(new File(fileStorageLocation));
+
+        log.info("Fetch file names process completed");
+
+        return fileNames;
     }
 
     private void validation(MultipartFile file){
@@ -89,5 +102,17 @@ public class FileStorageServiceImpl implements FileStorageService {
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
+    }
+
+    private List<String> listFilesForFolder(File folder) {
+        List<String> fileNames = new ArrayList<>();
+        for (File fileEntry : Objects.requireNonNull(folder.listFiles())) {
+            if (fileEntry.isDirectory()) {
+                listFilesForFolder(fileEntry);
+            } else {
+                fileNames.add(fileEntry.getName());
+            }
+        }
+        return fileNames;
     }
 }

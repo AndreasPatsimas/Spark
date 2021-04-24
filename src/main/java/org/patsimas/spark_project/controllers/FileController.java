@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/file-storage")
@@ -22,5 +24,13 @@ public class FileController {
         log.info("Upload file {}", file.getName());
 
         return fileStorageService.uploadFile(file);
+    }
+
+    @GetMapping
+    public List<String> getFileNames() {
+
+        log.info("Fetch file names");
+
+        return fileStorageService.fetchFileNames();
     }
 }
