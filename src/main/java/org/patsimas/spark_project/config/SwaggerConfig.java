@@ -28,6 +28,7 @@ public class SwaggerConfig {
     private Predicate<String> mainPath() {
 
         return or(
+                regex("/file-storage.*"),
                 regex("/distance-joins.*")
         );
     }
