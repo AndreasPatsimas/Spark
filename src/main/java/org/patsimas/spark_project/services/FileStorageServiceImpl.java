@@ -1,6 +1,5 @@
 package org.patsimas.spark_project.services;
 
-import lombok.extern.slf4j.Slf4j;
 import org.patsimas.spark_project.domain.UploadFileResponse;
 import org.patsimas.spark_project.exceptions.FileStorageException;
 import org.patsimas.spark_project.utils.NumericUtils;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-@Slf4j
 @PropertySource("classpath:application.properties")
 public class FileStorageServiceImpl implements FileStorageService {
 
@@ -33,7 +31,6 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public UploadFileResponse uploadFile(MultipartFile file) {
 
-        log.info("Upload file {} process begins", file.getOriginalFilename());
 
         validation(file);
 
@@ -44,8 +41,6 @@ public class FileStorageServiceImpl implements FileStorageService {
                 .path(fileName)
                 .toUriString();
 
-        log.info("Upload file process completed");
-
         return new UploadFileResponse(fileName, fileDownloadUri,
                 file.getContentType(), file.getSize());
     }
@@ -53,13 +48,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public List<String> fetchFileNames() {
 
-        log.info("Fetch file names process begins");
-
-        List<String> fileNames = listFilesForFolder(new File(fileStorageLocation));
-
-        log.info("Fetch file names process completed");
-
-        return fileNames;
+        return listFilesForFolder(new File(fileStorageLocation));
     }
 
     private void validation(MultipartFile file){
