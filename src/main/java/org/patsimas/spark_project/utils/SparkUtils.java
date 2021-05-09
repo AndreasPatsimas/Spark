@@ -7,8 +7,7 @@ import org.apache.spark.sql.SparkSession;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.*;
 
 public class SparkUtils {
 
@@ -31,7 +30,7 @@ public class SparkUtils {
         return df.cache();
     }
 
-    public static Dataset<Row> getUnionFilteredDf(Dataset<Row> dfOne, Dataset<Row> dfTwo, double value){
+    public static Dataset<Row> getUnionFilteredDf(Dataset<Row> dfOne, Dataset<Row> dfTwo, double value, int cores){
 
         Map<String, Double> map = getMinMaxValues(dfOne, dfTwo, value);
         double xMin = map.get(X_MIN);
@@ -41,15 +40,36 @@ public class SparkUtils {
 
         Dataset<Row> unionDf = dfOne.union(dfTwo);
 
-        Dataset<Row> unionFilteredDf = unionDf.filter(col("X").gt(xMin) //mbr
+        Dataset<Row> unionFilteredDf = unionDf.filter(col("X").gt(xMin)
                 .and(col("X").lt(xMax))
                 .and(col("Y").gt(yMin))
                 .and(col("Y").lt(yMax)));
 
+        unionFilteredDf = unionFilteredDf.withColumn("piece", lit(""));
+        unionFilteredDf = unionFilteredDf.withColumn("piece", when(col("X").equalTo(xMin), 0));
+
+        double step = xMax - xMin / cores;
+
+        for (int i = 0; i < cores; i ++)
+            unionFilteredDf = unionFilteredDf
+                    .withColumn("piece", when(col("X")
+                            .gt(i*step + xMin).and(col("X")
+                            .leq((i+1)*step + xMin)), 1)
+                    .otherwise(col("piece")));
+
         return unionFilteredDf.cache();
     }
 
-    private static Map<String, Double> getMinMaxValues(Dataset<Row> dfOne, Dataset<Row> dfTwo, double value){
+    public static double getStep(Dataset<Row> dfOne, Dataset<Row> dfTwo, double value, int cores){
+
+        Map<String, Double> map = getMinMaxValues(dfOne, dfTwo, value);
+        double xMin = map.get(X_MIN);
+        double xMax = map.get(X_MAX);
+
+        return xMax - xMin / cores;
+    }
+
+    public static Map<String, Double> getMinMaxValues(Dataset<Row> dfOne, Dataset<Row> dfTwo, double value){
 
         double xOneMin = getMin(dfOne, "X");
         double yOneMin = getMin(dfOne, "Y");
@@ -86,7 +106,7 @@ public class SparkUtils {
         else
             yMax = yTwoMax + value;
 
-        Map<String, Double> map = new HashMap<>();
+        Map<String, Double> map = new HashMap<String, Double>();
         map.put(X_MIN, xMin);
         map.put(X_MAX, xMax);
         map.put(Y_MIN, yMin);
