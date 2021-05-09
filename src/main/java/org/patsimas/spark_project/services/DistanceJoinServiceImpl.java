@@ -42,8 +42,8 @@ public class DistanceJoinServiceImpl implements DistanceJoinService {
         SQLContext sqlContext = new  SQLContext(sparkSession);
         JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
 
-        Dataset<Row> dfOne = getDf(sparkSession, "C:/data/ais_one_hour.csv", "One");
-        Dataset<Row> dfTwo = getDf(sparkSession, "C:/data/ais_one_hour2.csv", "Two");
+        Dataset<Row> dfOne = getDf(sparkSession, "data/ais_one_hour.csv", "One");
+        Dataset<Row> dfTwo = getDf(sparkSession, "data/ais_one_hour2.csv", "Two");
 
         Dataset<Row> unionFilteredDf = getUnionFilteredDf(dfOne, dfTwo, value, cores);
         unionFilteredDf.createOrReplaceTempView("initial");
