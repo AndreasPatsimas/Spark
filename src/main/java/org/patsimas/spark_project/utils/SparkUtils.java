@@ -106,7 +106,7 @@ public class SparkUtils {
         else
             yMax = yTwoMax + value;
 
-        Map<String, Double> map = new HashMap<String, Double>();
+        Map<String, Double> map = new HashMap<>();
         map.put(X_MIN, xMin);
         map.put(X_MAX, xMax);
         map.put(Y_MIN, yMin);
