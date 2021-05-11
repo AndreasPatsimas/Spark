@@ -19,11 +19,9 @@ public class DistanceJoinController {
     private DistanceJoinService distanceJoinService;
 
     @ApiOperation(value = "Find Distance Joins for specific value.", response = DistanceJoinDto.class)
-    @GetMapping(value = "/{fileNameOne}/{fileNameTwo}/{value}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Set<DistanceJoinDto> importCsv(@PathVariable("fileNameOne") String fileOne,
-                                          @PathVariable("fileNameTwo") String fileTwo,
-                                          @PathVariable("value") Long value) {
+    @GetMapping(value = "/{value}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Set<DistanceJoinDto> importCsv(@PathVariable("value") Double value) {
 
-        return distanceJoinService.fetchDistanceJoins(fileOne, fileTwo, value);
+        return distanceJoinService.fetchDistanceJoins(value);
     }
 }

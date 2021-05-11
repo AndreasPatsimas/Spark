@@ -30,7 +30,7 @@ public class DistanceJoinServiceImpl implements DistanceJoinService {
     private static final String X_MIN = "xMin";
 
     @Override
-    public Set<DistanceJoinDto> fetchDistanceJoins(String fileNameOne, String fileNameTwo, Long value) {
+    public Set<DistanceJoinDto> fetchDistanceJoins(Double value) {
 
         int cores = 12;
 
@@ -42,8 +42,8 @@ public class DistanceJoinServiceImpl implements DistanceJoinService {
         SQLContext sqlContext = new  SQLContext(sparkSession);
         JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext());
 
-        Dataset<Row> dfOne = getDf(sparkSession, "data/ais_one_hour.csv", "One");
-        Dataset<Row> dfTwo = getDf(sparkSession, "data/ais_one_hour2.csv", "Two");
+        Dataset<Row> dfOne = getDf(sparkSession, "data/ais_one_hour - Αντιγραφή.csv", "One");
+        Dataset<Row> dfTwo = getDf(sparkSession, "data/ais_one_hour2 - Αντιγραφή.csv", "Two");
 
         Dataset<Row> unionFilteredDf = getUnionFilteredDf(dfOne, dfTwo, value, cores);
         unionFilteredDf.createOrReplaceTempView("initial");
@@ -73,13 +73,14 @@ public class DistanceJoinServiceImpl implements DistanceJoinService {
 
         long startTime = System.nanoTime();
 
-        Dataset<Row> results = sqlContext.sql("select distinct a._id, b._id from final a, final b " +
-                "where ((a.X-b.X)*(a.X-b.X) + (a.Y-b.Y)*(a.Y-b.Y)) <= " + value * value + " and a.piece = b.piece " +
-                "and a.dfId != b.dfId");
+        Dataset<Row> results = sqlContext.sql("select distinct a._id, a.X, a.Y, b._id, b.X, b.Y from final a " +
+                "inner join final b on a.piece = b.piece " +
+                "where ((a.X-b.X)*(a.X-b.X) + (a.Y-b.Y)*(a.Y-b.Y)) <= " + value * value + " and a.dfId != b.dfId");
 
         long endTime = System.nanoTime();
 
         results = results.cache();
+//        results.collectAsList().stream().map(row -> row.)
         sc.parallelize(results.collectAsList(), 3);
         System.out.println("naos: " + results.count());
         results.show(10);
