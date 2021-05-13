@@ -9,12 +9,14 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.patsimas.spark_project.dto.CoordinateDto;
 import org.patsimas.spark_project.dto.DistanceJoinDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.patsimas.spark_project.utils.SparkUtils.*;
 
@@ -80,13 +82,18 @@ public class DistanceJoinServiceImpl implements DistanceJoinService {
         long endTime = System.nanoTime();
 
         results = results.cache();
-//        results.collectAsList().stream().map(row -> row.)
-        sc.parallelize(results.collectAsList(), 3);
-        System.out.println("naos: " + results.count());
-        results.show(10);
+        List<Row> rows = results.collectAsList();
+        sc.parallelize(rows, 3);
+        Set<DistanceJoinDto> distanceJoins = rows.parallelStream().map(row -> {
+
+            CoordinateDto coordinateOne = new CoordinateDto(row.getString(0), row.getDouble(1), row.getDouble(2));
+            CoordinateDto coordinateTwo = new CoordinateDto(row.getString(3), row.getDouble(4), row.getDouble(5));
+
+            return new DistanceJoinDto(coordinateOne, coordinateTwo);
+        }).collect(Collectors.toSet());
 
         System.out.println("Took " + (endTime - startTime) / 1000000000 + " sec");
 
-        return new HashSet<>();
+        return distanceJoins;
     }
 }

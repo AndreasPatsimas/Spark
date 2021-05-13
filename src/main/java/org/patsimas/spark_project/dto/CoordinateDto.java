@@ -2,24 +2,24 @@ package org.patsimas.spark_project.dto;
 
 public class CoordinateDto {
 
-    private Long id;
+    private String id;
     private Double lon;
     private Double lat;
 
     public CoordinateDto() {
     }
 
-    public CoordinateDto(Long id, Double lon, Double lat) {
+    public CoordinateDto(String id, Double lon, Double lat) {
         this.id = id;
         this.lon = lon;
         this.lat = lat;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
