@@ -96,4 +96,6 @@ public class DistanceJoinServiceImpl implements DistanceJoinService {
 
         return distanceJoins;
     }
+
+    //https://www.youtube.com/watch?v=YanzUI-30pI
 }
